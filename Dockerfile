@@ -24,7 +24,9 @@ COPY Rprofile.gp.site /usr/lib/R/etc/Rprofile.site
 COPY install_stuff.R /build/source/install_stuff.R
 RUN Rscript /build/source/install_stuff.R
 
-# the module files are set into /usr/local/bin/cogaps
+ENV PATH "$PATH:/usr/local/bin/sctk"
+COPY src/* /usr/local/bin/sctk/
+
  
 CMD ["Rscript", "/usr/local/bin/cogaps/run_gp_tutorial_module.R" ]
 
