@@ -43,7 +43,9 @@ option_list <- list(
   make_option("--cls.file",  dest="cls.file"),
   make_option("--Run.PCA",  dest="Run.PCA", type="logical"),
   make_option("--Run.TSNE", dest="Run.TSNE", type="logical"),
-  make_option("--output.file", dest="output.file")
+  make_option("--output.file", dest="output.file"),
+  make_option("--log.transform", dest="log.transform", type="logical")
+
   )
 
 # Parse the command line arguments with the option list, printing the result
@@ -75,6 +77,10 @@ if (is.null(opt$assay.name) || grepl("^[[:space:]]*$", opt$assay.name)) {
 gct <-read.gct(assay.file)
 df = data.frame(gct[2])
 
+if (opt$log.transform) {
+	df = log2(df)
+}
+
 if (is.null(opt$cls.file) || grepl("^[[:space:]]*$", opt$cls.file)) {
    stop("Required parameter cls file was not provided.")
 } else {
@@ -82,7 +88,7 @@ if (is.null(opt$cls.file) || grepl("^[[:space:]]*$", opt$cls.file)) {
    cls.label <- c("sample","class")
    cdf = data.frame(colnames(df), cls$labels)
    rownames(cdf) <- c(colnames(df))
-   
+   condition="cls.labels" 
 }
 
 
@@ -91,7 +97,7 @@ gct_sce <- createSCE(assayFile=df, annotFile=cdf, assayName=assay.name, inputDat
 if (opt$Run.PCA){
 	gct_sce <- getPCA(gct_sce, useAssay=assay.name, reducedDimName="PCA")
 	pdf(paste(opt$output.file, "_PCA.pdf", sep=""))
-	print(plotPCA(gct_sce, reducedDimName = "PCA", colorBy = "cls.labels"))
+	print(plotPCA(gct_sce, reducedDimName = "PCA", colorBy = condition))
 	dev.off()
 	gctPCA = {}
 	gctPCA$data <-data.frame(reducedDim(gct_sce, "PCA"))
@@ -101,12 +107,27 @@ if (opt$Run.PCA){
 if (opt$Run.TSNE){
 	gct_sce <- getTSNE(gct_sce, useAssay=assay.name, reducedDimName="TSNE")
 	pdf(paste(opt$output.file, "_TSNE.pdf", sep=""))
-	print(plotTSNE(gct_sce, reducedDimName = "TSNE", colorBy = "cls.labels"))
+	print(plotTSNE(gct_sce, reducedDimName = "TSNE", colorBy = condition))
 	dev.off()
 	gctTSNE = {}
 	gctTSNE$data <-data.frame(reducedDim(gct_sce, "TSNE"))
 	write.gct(gctTSNE, file.path(getwd(), paste(opt$output.file, "_TSNE.gct", sep="")))
 }
+
+mast_results <- MAST(gct_sce, condition = condition, useThresh = TRUE, useAssay = assay.name)
+pdf(paste(opt$output.file, "_Violin.pdf", sep=""))
+print(MASTviolin(gct_sce, useAssay = assay.name , fcHurdleSig = mast_results, threshP = TRUE, condition = condition))
+dev.off()
+
+pdf(paste(opt$output.file, "_Regression.pdf", sep=""))
+print(MASTregression(gct_sce, useAssay = assay.name, fcHurdleSig = mast_results, threshP = TRUE, condition = condition))
+dev.off()
+
+pdf(paste(opt$output.file, "_DiffEx.pdf", sep=""))
+print(plotDiffEx(gct_sce, useAssay = assay.name, condition = condition, geneList = mast_results$Gene[1:100], annotationColors = "auto",  clusterRow=FALSE, displayRowLabels = FALSE, displayColumnLabels = FALSE))
+dev.off()
+
+
 
 
 
