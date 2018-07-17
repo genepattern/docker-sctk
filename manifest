@@ -42,7 +42,7 @@ p2_value=
 
 p3_MODE=IN
 p3_TYPE=TEXT
-p3_default_value=
+p3_default_value=logtpm
 p3_description=Assay name to use in plots
 p3_name=assay.name
 p3_numValues=1..1
