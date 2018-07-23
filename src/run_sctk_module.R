@@ -95,7 +95,7 @@ if (is.null(opt$cls.file) || grepl("^[[:space:]]*$", opt$cls.file)) {
 }
 
 
-gct_sce <- createSCE(assayFile=df, annotFile=cdf, assayName=assay.name, inputDataFrames=TRUE)
+gct_sce <- createSCE(assayFile=df, annotFile=cdf, assayName=assay.name, inputDataFrames=TRUE, createLogCounts = FALSE)
 
 if (opt$Run.PCA){
 	gct_sce <- getPCA(gct_sce, useAssay=assay.name, reducedDimName="PCA")
@@ -143,24 +143,28 @@ if (opt$Run.DiffEx){
 if (opt$Run.GSVA){
 	gsvaRes <- gsvaSCE(gct_sce, useAssay = assay.name,
                    "MSigDB c2 (Human, Entrez ID only)",
-                   c("KEGG_PROTEASOME",
-                     "REACTOME_VIF_MEDIATED_DEGRADATION_OF_APOBEC3G",
-                     "REACTOME_P53_INDEPENDENT_DNA_DAMAGE_RESPONSE",
-                     "BIOCARTA_PROTEASOME_PATHWAY",
-                     "REACTOME_METABOLISM_OF_AMINO_ACIDS",
-                     "REACTOME_REGULATION_OF_ORNITHINE_DECARBOXYLASE",
-                     "REACTOME_CYTOSOLIC_TRNA_AMINOACYLATION",
-                     "REACTOME_STABILIZATION_OF_P53",
-                     "REACTOME_SCF_BETA_TRCP_MEDIATED_DEGRADATION_OF_EMI1"),
+                   c("KEGG_PROTEASOME", "REACTOME_VIF_MEDIATED_DEGRADATION_OF_APOBEC3G",  "REACTOME_P53_INDEPENDENT_DNA_DAMAGE_RESPONSE",  "BIOCARTA_PROTEASOME_PATHWAY", "REACTOME_METABOLISM_OF_AMINO_ACIDS", "REACTOME_REGULATION_OF_ORNITHINE_DECARBOXYLASE", "REACTOME_CYTOSOLIC_TRNA_AMINOACYLATION", "REACTOME_STABILIZATION_OF_P53","REACTOME_SCF_BETA_TRCP_MEDIATED_DEGRADATION_OF_EMI1"),
                     parallel.sz=1)
 	set.seed(1234)
-	
+
+#"KEGG_PROTEASOME", "REACTOME_VIF_MEDIATED_DEGRADATION_OF_APOBEC3G",  "REACTOME_P53_INDEPENDENT_DNA_DAMAGE_RESPONSE",  "BIOCARTA_PROTEASOME_PATHWAY", "REACTOME_METABOLISM_OF_AMINO_ACIDS", "REACTOME_REGULATION_OF_ORNITHINE_DECARBOXYLASE", "REACTOME_CYTOSOLIC_TRNA_AMINOACYLATION", "REACTOME_STABILIZATION_OF_P53","REACTOME_SCF_BETA_TRCP_MEDIATED_DEGRADATION_OF_EMI1"
+
+	#print(gsvaRes)
+
+        try({
 	pdf(paste(opt$output.file, "_GSVA_Violin.pdf", sep=""))
-	gsvaPlot(gct_sce, gsvaRes, "Violin", condition)
+	print(gsvaPlot(gct_sce, gsvaRes, "Violin", condition))
 	dev.off()
-	pdf(paste(opt$output.file, "_GSVA_Heatmap.pdf", sep=""))
-	gsvaPlot(gct_sce, gsvaRes, "Heatmap", condition)
+        })
+ 
+
+        try({
+  	pdf(paste(opt$output.file, "_GSVA_Heatmap.pdf", sep=""))
+	print(gsvaPlot(gct_sce, gsvaRes, "Heatmap", condition))
 	dev.off()
+        })
+
+       print("SCTK Done");
 }
 
 
