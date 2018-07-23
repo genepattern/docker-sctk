@@ -5,7 +5,7 @@ JVMLevel=
 LSID=urn\:lsid\:broad.mit.edu\:cancer.software.genepattern.module.analysis\:00377\:0.1
 author=Dave Jenkins, Boston University, wrapped as a module by Ted Liefeld, UCSD School of Medicine.
 categories=SingleCell
-commandLine=/usr/bin/Rscript --no-save --quiet --slave --no-restore /usr/local/bin/sctk/run_sctk_module.R  --assay.file\=<assay.file> --cls.file <cls.file> --assay.name=<assay.name> --Run.PCA=<Run.PCA> --Run.TSNE=<Run.TSNE> --output.file\=<output.file> --log.transform <log.transform>
+commandLine=/usr/bin/Rscript --no-save --quiet --slave --no-restore /usr/local/bin/sctk/run_sctk_module.R  --assay.file\=<assay.file> --cls.file <cls.file> --assay.name=<assay.name> --Run.PCA=<Run.PCA> --Run.TSNE=<Run.TSNE> --output.file\=<output.file> --log.transform <log.transform> --Run.DiffEx=<Run.differential.expression> --Run.GSVA=<Run.GSVA>
 cpuType=any
 description=Run common single cell analysis including differential expression, downsampling analysis, and clustering.
 fileFormat=mtx
@@ -105,6 +105,36 @@ p7_prefix=
 p7_prefix_when_specified=
 p7_type=java.lang.String
 p7_value=True\=True;False\=False
+
+p8_MODE=
+p8_TYPE=TEXT
+p8_default_value=True
+p8_description=Whether to run differential expression on the input data
+p8_fileFormat=
+p8_flag=
+p8_name=Run.differential.expression
+p8_numValues=1..1
+p8_optional=
+p8_prefix=
+p8_prefix_when_specified=
+p8_type=java.lang.String
+p8_value=True\=True;False\=False
+
+p9_MODE=
+p9_TYPE=TEXT
+p9_default_value=True
+p9_description=Whether to run GSVA on the input data
+p9_fileFormat=
+p9_flag=
+p9_name=Run.GSVA
+p9_numValues=1..1
+p9_optional=
+p9_prefix=
+p9_prefix_when_specified=
+p9_type=java.lang.String
+p9_value=True\=True;False\=False
+
+
 
 privacy=public
 publicationDate=06/22/2018 09\:09 

@@ -43,6 +43,9 @@ option_list <- list(
   make_option("--cls.file",  dest="cls.file"),
   make_option("--Run.PCA",  dest="Run.PCA", type="logical"),
   make_option("--Run.TSNE", dest="Run.TSNE", type="logical"),
+  make_option("--Run.GSVA", dest="Run.GSVA", type="logical"),
+  make_option("--Run.DiffEx", dest="Run.DiffEx", type="logical"),
+
   make_option("--output.file", dest="output.file"),
   make_option("--log.transform", dest="log.transform", type="logical")
 
@@ -114,21 +117,51 @@ if (opt$Run.TSNE){
 	write.gct(gctTSNE, file.path(getwd(), paste(opt$output.file, "_TSNE.gct", sep="")))
 }
 
-mast_results <- MAST(gct_sce, condition = condition, useThresh = TRUE, useAssay = assay.name)
-pdf(paste(opt$output.file, "_Violin.pdf", sep=""))
-print(MASTviolin(gct_sce, useAssay = assay.name , fcHurdleSig = mast_results, threshP = TRUE, condition = condition))
-dev.off()
+if (opt$Run.DiffEx){
 
-pdf(paste(opt$output.file, "_Regression.pdf", sep=""))
-print(MASTregression(gct_sce, useAssay = assay.name, fcHurdleSig = mast_results, threshP = TRUE, condition = condition))
-dev.off()
+	thresholds <- thresholdGenes(gct_sce, useAssay = assay.name)
+        pdf(paste(opt$output.file, "_MAST_Thresholds.pdf", sep=""))
+	par(mfrow = c(5, 4))
+	plot(thresholds)
+	par(mfrow = c(1, 1))
+	dev.off()
 
-pdf(paste(opt$output.file, "_DiffEx.pdf", sep=""))
-print(plotDiffEx(gct_sce, useAssay = assay.name, condition = condition, geneList = mast_results$Gene[1:100], annotationColors = "auto",  clusterRow=FALSE, displayRowLabels = FALSE, displayColumnLabels = FALSE))
-dev.off()
+	mast_results <- MAST(gct_sce, condition = condition, useThresh = TRUE, useAssay = assay.name)
+	pdf(paste(opt$output.file, "_MAST_Violin.pdf", sep=""))
+	print(MASTviolin(gct_sce, useAssay = assay.name , fcHurdleSig = mast_results, threshP = TRUE, condition = condition))
+	dev.off()
 
+	pdf(paste(opt$output.file, "_MAST_Regression.pdf", sep=""))
+	print(MASTregression(gct_sce, useAssay = assay.name, fcHurdleSig = mast_results, threshP = TRUE, condition = condition))
+	dev.off()
 
+	pdf(paste(opt$output.file, "_MAST_DiffEx.pdf", sep=""))
+	print(plotDiffEx(gct_sce, useAssay = assay.name, condition = condition, geneList = mast_results$Gene[1:100], annotationColors = "auto",  clusterRow=FALSE, displayRowLabels = FALSE, displayColumnLabels = FALSE))
+	dev.off()
+}
 
+if (opt$Run.GSVA){
+	gsvaRes <- gsvaSCE(gct_sce, useAssay = assay.name,
+                   "MSigDB c2 (Human, Entrez ID only)",
+                   c("KEGG_PROTEASOME",
+                     "REACTOME_VIF_MEDIATED_DEGRADATION_OF_APOBEC3G",
+                     "REACTOME_P53_INDEPENDENT_DNA_DAMAGE_RESPONSE",
+                     "BIOCARTA_PROTEASOME_PATHWAY",
+                     "REACTOME_METABOLISM_OF_AMINO_ACIDS",
+                     "REACTOME_REGULATION_OF_ORNITHINE_DECARBOXYLASE",
+                     "REACTOME_CYTOSOLIC_TRNA_AMINOACYLATION",
+                     "REACTOME_STABILIZATION_OF_P53",
+                     "REACTOME_SCF_BETA_TRCP_MEDIATED_DEGRADATION_OF_EMI1"),
+                    parallel.sz=1)
+	set.seed(1234)
+	
+	pdf(paste(opt$output.file, "_GSVA_Violin.pdf", sep=""))
+	gsvaPlot(gct_sce, gsvaRes, "Violin", condition)
+	dev.off()
+	pdf(paste(opt$output.file, "_GSVA_Heatmap.pdf", sep=""))
+	gsvaPlot(gct_sce, gsvaRes, "Heatmap", condition)
+	dev.off()
+}
 
 
 
