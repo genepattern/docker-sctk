@@ -7,6 +7,9 @@ biocLite("singleCellTK")
 biocLite("xtable")
 biocLite("bladderbatch")
 
+install.packages(c("optparse","foreach"))
+
+
 suppressPackageStartupMessages({
   library(MAST)
   library(singleCellTK)
